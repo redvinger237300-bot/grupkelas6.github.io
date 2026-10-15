@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absensi Siswa</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+  }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-attachment: fixed;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 28px;
+    animation: fadeInUp 0.6s ease;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 26px;
+    background: linear-gradient(90deg, #667eea, #f093fb);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* === CLOCK BOX === */
+  .clock-box {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 16px;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .clock-date {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+
+  .clock-time {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .clock-zone {
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 6px;
+  }
+
+  /* === FORM === */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s;
+    background: #fafafa;
+  }
+
+  input[type="text"]:focus {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+  }
+
+  /* === STATUS OPTIONS === */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .status-option {
+    position: relative;
+  }
+
+  .status-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .status-option label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 8px;
+    border-radius: 12px;
+    background: #f0f0f5;
+    color: #555;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 2px solid transparent;
+    margin: 0;
+    user-select: none;
+  }
+
+  .status-option label:hover {
+    transform: translateY(-2px);
+  }
+
+  .status-option input:checked + label {
+    color: white;
+    transform: scale(1.03);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .status-option input:checked + label[data-type="hadir"] {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+  }
+  .status-option input:checked + label[data-type="izin"] {
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+  }
+  .status-option input:checked + label[data-type="sakit"] {
+    background: linear-gradient(135deg, #ff6a00, #ee0979);
+  }
+  .status-option input:checked + label[data-type="alpa"] {
+    background: linear-gradient(135deg, #eb3349, #f45c43);
+  }
+
+  /* === BUTTON === */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: white;
+    margin-top: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.5);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #eb3349, #f45c43);
+    box-shadow: 0 6px 16px rgba(235, 51, 73, 0.4);
+  }
+
+  .btn-export {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    box-shadow: 0 6px 16px rgba(17, 153, 142, 0.4);
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .btn-row .btn {
+    margin-top: 0;
+  }
+
+  /* === DATA LIST === */
+  .data-section {
+    margin-top: 28px;
+    border-top: 2px dashed #e0e0e0;
+    padding-top: 20px;
+  }
+
+  .data-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .data-header h2 {
+    font-size: 16px;
+    color: #333;
+  }
+
+  .data-count {
+    background: linear-gradient(135deg, #667eea, #f093fb);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    padding: 30px 10px;
+    font-style: italic;
+  }
+
+  .student-card {
+    background: #fafafa;
+    border-left: 5px solid #667eea;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-15px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .student-card[data-status="hadir"] { border-color: #11998e; }
+  .student-card[data-status="izin"]  { border-color: #f7971e; }
+  .student-card[data-status="sakit"] { border-color: #ff6a00; }
+  .student-card[data-status="alpa"]  { border-color: #eb3349; }
+
+  .student-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .student-name {
+    font-weight: 700;
+    color: #333;
+    font-size: 14px;
+    word-break: break-word;
+  }
+
+  .student-meta {
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .student-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: white;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .student-status[data-status="hadir"] { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .student-status[data-status="izin"]  { background: linear-gradient(135deg, #f7971e, #ffd200); }
+  .student-status[data-status="sakit"] { background: linear-gradient(135deg, #ff6a00, #ee0979); }
+  .student-status[data-status="alpa"]  { background: linear-gradient(135deg, #eb3349, #f45c43); }
+
+  .delete-btn {
+    background: transparent;
+    border: none;
+    color: #eb3349;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+
+  .delete-btn:hover {
+    background: rgba(235, 51, 73, 0.1);
+  }
+
+  /* === TOAST === */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.error {
+    background: linear-gradient(135deg, #eb3349, #f45c43);
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 20px; border-radius: 18px; }
+    h1 { font-size: 22px; }
+    .clock-time { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📋 Absensi Siswa</h1>
+  <p class="subtitle">Isi kehadiranmu dengan jujur ya ✨</p>
+
+  <!-- CLOCK -->
+  <div class="clock-box">
+    <div class="clock-date" id="liveDate">Memuat tanggal...</div>
+    <div class="clock-time" id="liveTime">--:--:--</div>
+    <div class="clock-zone">🕐 Waktu Indonesia Barat (WIB)</div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-group">
+    <label for="studentName">Nama Siswa</label>
+    <input type="text" id="studentName" placeholder="Contoh: Budi Santoso" maxlength="40" autocomplete="off">
+  </div>
+
+  <div class="form-group">
+    <label>Status Kehadiran</label>
+    <div class="status-grid">
+      <div class="status-option">
+        <input type="radio" name="status" id="s-hadir" value="hadir">
+        <label for="s-hadir" data-type="hadir">✅ Hadir</label>
+      </div>
+      <div class="status-option">
+        <input type="radio" name="status" id="s-izin" value="izin">
+        <label for="s-izin" data-type="izin">📝 Izin</label>
+      </div>
+      <div class="status-option">
+        <input type="radio" name="status" id="s-sakit" value="sakit">
+        <label for="s-sakit" data-type="sakit">🤒 Sakit</label>
+      </div>
+      <div class="status-option">
+        <input type="radio" name="status" id="s-alpa" value="alpa">
+        <label for="s-alpa" data-type="alpa">❌ Alpa</label>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="submitBtn">📤 Kirim Absensi</button>
+
+  <!-- DATA SECTION -->
+  <div class="data-section">
+    <div class="data-header">
+      <h2>📊 Data Absensi Hari Ini</h2>
+      <span class="data-count" id="dataCount">0 siswa</span>
+    </div>
+    <div id="dataList">
+      <div class="empty-state">Belum ada yang absen hari ini</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-export" id="exportBtn">💾 Export CSV</button>
+      <button class="btn btn-danger" id="resetBtn">🗑️ Reset Hari Ini</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Absensi berhasil dikirim!</div>
+
+<script>
+(function() {
+  "use strict";
+
+  const STORAGE_KEY = "absensi_siswa_v1";
+
+  const $name    = document.getElementById("studentName");
+  const $date    = document.getElementById("liveDate");
+  const $time    = document.getElementById("liveTime");
+  const $list    = document.getElementById("dataList");
+  const $count   = document.getElementById("dataCount");
+  const $toast   = document.getElementById("toast");
+
+  const HARI  = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const BULAN = ["Januari","Februari","Maret","April","Mei","Juni",
+                 "Juli","Agustus","September","Oktober","November","Desember"];
+
+  // === WAKTU WIB (UTC+7) ===
+  // Kita pakai Date dengan offset manual biar konsisten di semua device,
+  // walau device-nya beda timezone.
+  function getWIB() {
+    const now = new Date();
+    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+    return new Date(utcMs + (7 * 3600000));
+  }
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+
+  function formatTanggal(d) {
+    return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function formatJam(d) {
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function formatJamPendek(d) {
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function tanggalKey(d) {
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  // === CLOCK ===
+  let lastDateKey = null;
+
+  function tickClock() {
+    const wib = getWIB();
+    $date.textContent = formatTanggal(wib);
+    $time.textContent = formatJam(wib);
+
+    const key = tanggalKey(wib);
+    if (lastDateKey && lastDateKey !== key) {
+      // Ganti hari jam 00:00 WIB → refresh list
+      renderList();
+    }
+    lastDateKey = key;
+  }
+
+  // === STORAGE ===
+  function loadAll() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveAll(data) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      showToast("Gagal menyimpan data", true);
+    }
+  }
+
+  // === TOAST ===
+  let toastTimer = null;
+  function showToast(msg, isError) {
+    $toast.textContent = msg;
+    $toast.classList.toggle("error", !!isError);
+    $toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $toast.classList.remove("show"), 2400);
+  }
+
+  // === RENDER ===
+  function renderList() {
+    const todayKey = tanggalKey(getWIB());
+    const all = loadAll();
+    const todayData = all[todayKey] || [];
+
+    $list.innerHTML = "";
+
+    if (todayData.length === 0) {
+      $list.innerHTML = '<div class="empty-state">Belum ada yang absen hari ini</div>';
+      $count.textContent = "0 siswa";
+      return;
+    }
+
+    $count.textContent = todayData.length + " siswa";
+
+    // Urutkan dari yang terbaru
+    const sorted = todayData.slice().sort((a, b) => b.timestamp - a.timestamp);
+
+    sorted.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "student-card";
+      card.dataset.status = item.status;
+
+      card.innerHTML = `
+        <div class="student-info">
+          <div class="student-name">${escapeHtml(item.nama)}</div>
+          <div class="student-meta">
+            <span>📅 ${item.tanggal}</span>
+            <span>🕐 ${item.jam} WIB</span>
+          </div>
+        </div>
+        <span class="student-status" data-status="${item.status}">${statusLabel(item.status)}</span>
+        <button class="delete-btn" title="Hapus" data-id="${item.id}">✕</button>
+      `;
+
+      card.querySelector(".delete-btn").addEventListener("click", () => {
+        deleteItem(todayKey, item.id);
+      });
+
+      $list.appendChild(card);
+    });
+  }
+
+  function statusLabel(s) {
+    return { hadir: "Hadir", izin: "Izin", sakit: "Sakit", alpa: "Alpa" }[s] || s;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  // === ACTIONS ===
+  function submitAbsen() {
+    const nama = $name.value.trim();
+    if (!nama) {
+      showToast("Isi nama dulu ya!", true);
+      $name.focus();
+      return;
+    }
+    if (nama.length < 2) {
+      showToast("Nama minimal 2 karakter", true);
+      return;
+    }
+
+    const statusEl = document.querySelector('input[name="status"]:checked');
+    if (!statusEl) {
+      showToast("Pilih status kehadiran dulu!", true);
+      return;
+    }
+
+    const wib = getWIB();
+    const todayKey = tanggalKey(wib);
+
+    const all = loadAll();
+    if (!all[todayKey]) all[todayKey] = [];
+
+    // Cek duplikat nama hari ini
+    const duplicate = all[todayKey].some(x => x.nama.toLowerCase() === nama.toLowerCase());
+    if (duplicate) {
+      showToast("Nama ini sudah absen hari ini!", true);
+      return;
+    }
+
+    const entry = {
+      id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+      nama: nama,
+      status: statusEl.value,
+      tanggal: formatTanggal(wib),
+      jam: formatJamPendek(wib),
+      timestamp: Date.now()
+    };
+
+    all[todayKey].push(entry);
+    saveAll(all);
+
+    // Reset form
+    $name.value = "";
+    document.querySelectorAll('input[name="status"]').forEach(r => r.checked = false);
+
+    renderList();
+    showToast(`✅ ${nama} tercatat: ${statusLabel(entry.status)} pukul ${entry.jam} WIB`);
+  }
+
+  function deleteItem(dayKey, id) {
+    const all = loadAll();
+    if (!all[dayKey]) return;
+    all[dayKey] = all[dayKey].filter(x => x.id !== id);
+    if (all[dayKey].length === 0) delete all[dayKey];
+    saveAll(all);
+    renderList();
+    showToast("Data dihapus");
+  }
+
+  function resetToday() {
+    const todayKey = tanggalKey(getWIB());
+    const all = loadAll();
+    if (!all[todayKey] || all[todayKey].length === 0) {
+      showToast("Tidak ada data untuk direset", true);
+      return;
+    }
+    if (!confirm("Hapus semua data absensi HARI INI? Data hari lain tetap aman.")) return;
+    delete all[todayKey];
+    saveAll(all);
+    renderList();
+    showToast("Data hari ini dihapus");
+  }
+
+  function exportCSV() {
+    const all = loadAll();
+    const keys = Object.keys(all).sort();
+    if (keys.length === 0) {
+      showToast("Belum ada data untuk diexport", true);
+      return;
+    }
+
+    let csv = "Tanggal,Jam WIB,Nama,Status\n";
+    keys.forEach(k => {
+      all[k].forEach(item => {
+        csv += `"${item.tanggal}","${item.jam} WIB","${item.nama.replace(/"/g, '""')}","${statusLabel(item.status)}"\n`;
+      });
+    });
+
+    // BOM biar Excel baca UTF-8 dengan benar
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const wib = getWIB();
+    a.href = url;
+    a.download = `absensi_${tanggalKey(wib)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("File CSV berhasil diunduh");
+  }
+
+  // === EVENTS ===
+  document.getElementById("submitBtn").addEventListener("click", submitAbsen);
+  document.getElementById("resetBtn").addEventListener("click", resetToday);
+  document.getElementById("exportBtn").addEventListener("click", exportCSV);
+
+  $name.addEventListener("keydown", e => {
+    if (e.key === "Enter") submitAbsen();
+  });
+
+  // === INIT ===
+  tickClock();
+  setInterval(tickClock, 1000); // update tiap 1 detik
+  renderList();
+
+  console.log("[Absensi] Siap. Waktu WIB aktif.");
+})();
+</script>
+</body>
+</html>
